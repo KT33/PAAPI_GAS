@@ -15,11 +15,19 @@ function main() {
   var timestamp = yyyymmdd + "T" + Utilities.formatDate(now, "GMT", "HHmmss") + "Z";
   // console.log(yyyymmdd);
   // Logger.log(timestamp);
-  yyyymmdd = "20200803";
-  timestamp = "20200803T151752Z";
+   yyyymmdd = "20200803";
+   timestamp = "20200803T170630Z";
+
+  var dataString = '{\n    "Keywords": "' + word + '",\n    "PartnerTag": "' + Partner_Tag + '",\n    "PartnerType": "Associates",\n    "Marketplace": "www.amazon.co.jp"\n}';
+  //  var dataString = '{\n   "PartnerType":"Associates",\n   "PartnerTag":"shark0731-22",\n    "Keywords":"Harry",\n   "SearchIndex":"All",\n    "Resources":["Images.Primary.Small",\n    "ItemInfo.Title",\n   "Offers.Listings.Price"]}';
+  //  Logger.log(dataString);
+  dataString='{\n    "Keywords": "Harry",\n    "PartnerTag": "shark0731-22",\n    "PartnerType": "Associates",\n    "Marketplace": "www.amazon.co.jp"\n}'
+
+  // dataString = '{"Keywords":"Harry","PartnerTag": "shark0731-22","PartnerType": "Associates","Marketplace": "www.amazon.co.jp"}';
+  //  Logger.log(test);
 
   //  var canonicalURL=prepareCanonicalRequest(timestamp,"payload");
-  var canonicalURL = prepareCanonicalRequest(timestamp, "payload");
+  var canonicalURL = prepareCanonicalRequest(timestamp, dataString);
 
   //  Logger.log(canonicalURL);
   //  Logger.log(SHA256(canonicalURL));
@@ -27,48 +35,15 @@ function main() {
   var stringToSign = prepareStringToSign(timestamp, yyyymmdd, canonicalURL);
   //  var stringToSign = prepareStringToSign("20200802T134800Z", "20200802", canonicalURL);
 
-  //  Logger.log(stringToSign);
-
-  // var date = yyyymmdd;
-  // var key = Secret_Key;
-  // var regionName = region;
-  // var serviceName = "ProductAdvertisingAPI";
-
-  // var kDate = my_HMAC_keytext(date, "AWS4" + key);
-  // Logger.log("kDate\n");
-  // Logger.log(kDate);
-  // var kRegion = my_HMAC_keyB64(regionName, kDate);
-  // Logger.log("kRegion\n");
-  // Logger.log(kRegion);
-  // Logger.log(my_HMAC_keyB64_HEXOutput(regionName, kDate));
-  // var kService = my_HMAC_keyB64(serviceName, kRegion);
-  // Logger.log("kService\n");
-  // Logger.log(kService);
-  // Logger.log(my_HMAC_keyB64_HEXOutput(serviceName, kRegion));
-  // var kSigning = my_HMAC_keyB64("aws4_request", kService);
-  // Logger.log("kSigning\n");
-  // Logger.log(kSigning);
-  // Logger.log(my_HMAC_keyB64_HEXOutput("aws4_request", kService));
-
-
-  // var signatureKey=kSigning;
-  // var signature = my_HMAC_keyB64(stringToSign, signatureKey);
-
-  // Logger.log("HERE");
-  // Logger.log(signature);
-  // Logger.log(my_HMAC_keyB64_HEXOutput(stringToSign, signatureKey));
-
-
-  // kSigning = parseInt(kSigning, 16).toString(2);
-
 
   var signature = calculateSignature(Secret_Key, yyyymmdd, region, "ProductAdvertisingAPI", stringToSign);
   Logger.log("signature");
   Logger.log(signature);
 
-  var Authorization = "AWS4-HMAC-SHA256 Credential=" + Access_Key + "/" + yyyymmdd + "/us-west-2/ProductAdvertisingAPI/aws4_request,SignedHeaders=content-encoding;host;x-amz-date;x-amz-target,Signature=" + signature;
+  var Authorization="AWS4-HMAC-SHA256 Credential=" + Access_Key + "/" + yyyymmdd + "/us-west-2/ProductAdvertisingAPI/aws4_request SignedHeaders=content-encoding;host;x-amz-date;x-amz-target  Signature=" + signature;
   // Logger.log(Authorization);
-
+  Authorization="AWS4-HMAC-SHA256 Credential=AKIAIDXIEXSD36CHFA5A/20200803/us-west-2/ProductAdvertisingAPI/aws4_request SignedHeaders=content-encoding;host;x-amz-date;x-amz-target  Signature=072928ad8222166e7754c8a6248af8ad5db6e925dc5f4907f5aec0d29729da03";
+  
   var headers = {
     //    'Host': host,
     'Accept': 'application/json, text/javascript',
@@ -82,9 +57,6 @@ function main() {
   };
   Logger.log(headers);
 
-  var dataString = '{\n    "Keywords": "' + word + '",\n    "PartnerTag": "' + Partner_Tag + '",\n    "PartnerType": "Associates",\n    "Marketplace": "www.amazon.co.jp"\n}';
-  //  var dataString = '{\n   "PartnerType":"Associates",\n   "PartnerTag":"shark0731-22",\n    "Keywords":"Harry",\n   "SearchIndex":"All",\n    "Resources":["Images.Primary.Small",\n    "ItemInfo.Title",\n   "Offers.Listings.Price"]}';
-  // Logger.log(dataString);
 
   var url = 'https://webservices.amazon.co.jp/paapi5/searchitems';
 
@@ -108,13 +80,13 @@ function prepareCanonicalRequest(timestamp, payload) {
   var canonicalUrl = "POST\n";
   canonicalUrl = canonicalUrl + "/paapi5/searchitems" + "\n\n";
   canonicalUrl = canonicalUrl + "content-encoding:amz-1.0" + "\n";
-  canonicalUrl = canonicalUrl + "content-type:application/json; charset=utf-8" + "\n";
+  canonicalUrl = canonicalUrl + "content-type:application/json; charset=UTF-8" + "\n";
   canonicalUrl = canonicalUrl + "host:webservices.amazon.co.jp" + "\n";
   canonicalUrl = canonicalUrl + "x-amz-date:" + timestamp + "\n";
   canonicalUrl = canonicalUrl + "x-amz-target:com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems" + "\n\n";
   canonicalUrl = canonicalUrl + "content-encoding;content-type;host;x-amz-date;x-amz-target" + "\n";
   // canonicalUrl=canonicalUrl+SHA256(payload);
-  canonicalUrl = canonicalUrl + SHA256('{\n    "Keywords": "' + "Harry" + '",\n    "PartnerTag": "' + "shark0731-22" + '",\n    "PartnerType": "Associates",\n    "Marketplace": "www.amazon.co.jp"\n}');
+  canonicalUrl = canonicalUrl + SHA256(payload);
   //canonicalUrl = canonicalUrl + SHA256('{"PartnerType":"Associates","PartnerTag":"shark0731-22","Keywords":"Harry","SearchIndex":"All","Resources":["Images.Primary.Small","ItemInfo.Title","Offers.Listings.Price"]}');
 
   return canonicalUrl;
@@ -132,24 +104,24 @@ function prepareStringToSign(timestamp, yyyymmdd, canonicalURL) {
 
 function calculateSignature(secretAccessKey, currentDate, regionName, serviceName, stringToSign) {
   var kDate = my_HMAC_keytext(currentDate, "AWS4" + secretAccessKey);
-  Logger.log("kDate\n");
-  Logger.log(kDate);
+  // Logger.log("kDate\n");
+  // Logger.log(kDate);
   var kRegion = my_HMAC_keyB64(regionName, kDate);
-  Logger.log("kRegion\n");
-  Logger.log(kRegion);
-  Logger.log(my_HMAC_keyB64_HEXOutput(regionName, kDate));
+  // Logger.log("kRegion\n");
+  // Logger.log(kRegion);
+  // Logger.log(my_HMAC_keyB64_HEXOutput(regionName, kDate));
   var kService = my_HMAC_keyB64(serviceName, kRegion);
-  Logger.log("kService\n");
-  Logger.log(kService);
-  Logger.log(my_HMAC_keyB64_HEXOutput(serviceName, kRegion));
+  // Logger.log("kService\n");
+  // Logger.log(kService);
+  // Logger.log(my_HMAC_keyB64_HEXOutput(serviceName, kRegion));
   var kSigning = my_HMAC_keyB64("aws4_request", kService);
-  Logger.log("kSigning\n");
-  Logger.log(kSigning);
-  Logger.log(my_HMAC_keyB64_HEXOutput("aws4_request", kService));
+  // Logger.log("kSigning\n");
+  // Logger.log(kSigning);
+  // Logger.log(my_HMAC_keyB64_HEXOutput("aws4_request", kService));
 
   var signatureKey = kSigning;
   var signature = my_HMAC_keyB64_HEXOutput(stringToSign, signatureKey);
-  Logger.log(signature);
+  // Logger.log(signature);
 
   // Logger.log(signatureKey);
   // var signature = my_HMAC_keyB64(stringToSign, signatureKey);
@@ -193,17 +165,17 @@ function calculateSignature(secretAccessKey, currentDate, regionName, serviceNam
 //   // return kSigning;
 // }
 
-function hash_hmac(value, key) {
-  var output = Utilities.computeHmacSha256Signature(value, key);
-  output = output.reduce(function (str, chr) {
-    chr = (chr < 0 ? chr + 256 : chr).toString(16);
-    return str + (chr.length == 1 ? '0' : '') + chr;
-  }, '');
+// function hash_hmac(value, key) {
+//   var output = Utilities.computeHmacSha256Signature(value, key);
+//   output = output.reduce(function (str, chr) {
+//     chr = (chr < 0 ? chr + 256 : chr).toString(16);
+//     return str + (chr.length == 1 ? '0' : '') + chr;
+//   }, '');
 
-  // output=Utilities.base64Encode(output);
-  // output=encodeURIComponent(output);
-  return output;
-}
+//   // output=Utilities.base64Encode(output);
+//   // output=encodeURIComponent(output);
+//   return output;
+// }
 
 
 
@@ -223,43 +195,6 @@ function SHA256(input) {
   return txtHash;
 }
 
-// function hex2bin(hex)
-// {
-//     return decodeURIComponent(hex.match(new RegExp(
-//         '[0-7][0-9A-F]|' +
-//         '[CD][2-90-F][89AB][0-9A-F]|' +
-//         'E0[AB][0-9A-F][89AB][0-9A-F]|' +
-//         'E[1-9A-C](?:[89AB][0-9A-F]){2}|' +
-//         'ED[89][0-9A-F][89AB][0-9A-F]|' +
-//         'E[E-F](?:[89AB][0-9A-F]){2}|' +
-//         'F0[9B][0-9A-F](?:[89AB][0-9A-F]){2}|' +
-//         'F[1-3](?:[89AB][0-9A-F]){3}|' +
-//         'F48[0-9A-F](?:[89AB][0-9A-F]){2}'
-//     , 'gi')).map(function (char) {
-//         return char.replace(/([0-9A-F]{2})/gi, '%$1');
-//     }).join(''));
-
-
-
-// //  return decodeURIComponent(hex.replace(/([0-9A-F]{2})/gi, '%$1'));
-
-
-// //    var bytes = [], str;
-// //
-// //    for(var i=0; i< hex.length-1; i+=2)
-// //        bytes.push(parseInt(hex.substr(i, 2), 16));
-// //
-// //    return String.fromCharCode.apply(String, bytes);    
-// }
-
-
-function test2() {
-  var payload = 'POST\n/paapi5/searchitems\n\ncontent-encoding:amz-1.0\ncontent-type:application/json; charset=utf-8\nhost:webservices.amazon.co.jp\nx-amz-date:20200802T134800Z\nx-amz-target:com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems\n\ncontent-encoding;content-type;host;x-amz-date;x-amz-target\nd0a0554f78af0fe8ce5fbbe9d2d89695fc21507a7ec2f64e7e7e5b0e207d7a41';
-  //  var encoded = Utilities.base64EncodeWebSafe("{"PartnerType":"Associates","PartnerTag":"shark0731-22","Keywords":"Harry","SearchIndex":"All","Resources":["Images.Primary.Small","ItemInfo.Title","Offers.Listings.Price"]}");
-  Logger.log(payload);
-  var encoded = SHA256(payload);
-  Logger.log(encoded);
-}
 
 function my_HMAC_keytext(value, key) {
   const shaObj = new jsSHA("SHA-256", "TEXT", {
