@@ -15,14 +15,14 @@ function main() {
   var timestamp = yyyymmdd + "T" + Utilities.formatDate(now, "GMT", "HHmmss") + "Z";
   // console.log(yyyymmdd);
   // Logger.log(timestamp);
-   yyyymmdd = "20200804";
-   timestamp = "20200804T141928Z";
+  yyyymmdd = "20200804";
+  timestamp = "20200804T141928Z";
 
   var dataString = '{\n    "Keywords": "' + word + '",\n    "PartnerTag": "' + Partner_Tag + '",\n    "PartnerType": "Associates",\n    "Marketplace": "www.amazon.co.jp"\n}';
   //  var dataString = '{\n   "PartnerType":"Associates",\n   "PartnerTag":"shark0731-22",\n    "Keywords":"Harry",\n   "SearchIndex":"All",\n    "Resources":["Images.Primary.Small",\n    "ItemInfo.Title",\n   "Offers.Listings.Price"]}';
   //  Logger.log(dataString);
-//  dataString='{\n    "Keywords": "Harry",\n    "PartnerTag": "shark0731-22",\n    "PartnerType": "Associates",\n    "Marketplace": "www.amazon.co.jp"\n}'
-// dataString = '{"Keywords":"Harry","PartnerTag": "shark0731-22","PartnerType": "Associates","Marketplace": "www.amazon.co.jp"}';
+  //  dataString='{\n    "Keywords": "Harry",\n    "PartnerTag": "shark0731-22",\n    "PartnerType": "Associates",\n    "Marketplace": "www.amazon.co.jp"\n}'
+  // dataString = '{"Keywords":"Harry","PartnerTag": "shark0731-22","PartnerType": "Associates","Marketplace": "www.amazon.co.jp"}';
   //  Logger.log(test);
 
   //  var canonicalURL=prepareCanonicalRequest(timestamp,"payload");
@@ -39,10 +39,10 @@ function main() {
   Logger.log("signature");
   Logger.log(signature);
 
-  var Authorization="AWS4-HMAC-SHA256 Credential=" + Access_Key + "/" + yyyymmdd + "/us-west-2/ProductAdvertisingAPI/aws4_request SignedHeaders=content-encoding;host;x-amz-date;x-amz-target  Signature=" + signature;
+  var Authorization = "AWS4-HMAC-SHA256 Credential=" + Access_Key + "/" + yyyymmdd + "/us-west-2/ProductAdvertisingAPI/aws4_request SignedHeaders=content-encoding;host;x-amz-date;x-amz-target  Signature=" + signature;
   // Logger.log(Authorization);
-  Authorization="AWS4-HMAC-SHA256 Credential=AKIAIDXIEXSD36CHFA5A/20200804/us-west-2/ProductAdvertisingAPI/aws4_request SignedHeaders=content-encoding;host;x-amz-date;x-amz-target  Signature=2d8a4cae5bd711cab035aaf34c937128f5660e15b239b77d5f9b8f4619c67445";
-  
+  Authorization = "AWS4-HMAC-SHA256 Credential=AKIAIDXIEXSD36CHFA5A/20200804/us-west-2/ProductAdvertisingAPI/aws4_request SignedHeaders=content-encoding;host;x-amz-date;x-amz-target  Signature=2d8a4cae5bd711cab035aaf34c937128f5660e15b239b77d5f9b8f4619c67445";
+
   var headers = {
     //    'Host': host,
     'Accept': 'application/json, text/javascript',
