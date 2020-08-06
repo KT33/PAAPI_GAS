@@ -3,8 +3,17 @@ function doGet(e) {
   //スプレッドシートシートを取得
   var datasheet = SpreadsheetApp.getActiveSheet();
   
-  var word = "SEABREEZE";
-  //  var word = e.parameter.word;
+//  var word = "ONEPIECE";
+  var word = e.parameter.word;
+    Logger.log(word);
+  word=escape(word);
+  Logger.log(word);
+  word=word.toLowerCase();
+  Logger.log(word);
+    word=word.replace(/%/g,"\\");
+  Logger.log(word);
+    word=word.replace(/\\2\d/g," ");
+  Logger.log(word);
   
   // word=escape(word);
   
@@ -24,8 +33,8 @@ function doGet(e) {
   // Logger.log(timestamp);
   
   
-  var dataString = '{"PartnerType":"Associates","PartnerTag":"' + Partner_Tag + '","Keywords":"' + word + '","SearchIndex":"All","Resources":["Images.Primary.Small","ItemInfo.Title","Offers.Listings.Price"]}';
-  
+ var dataString = '{"ItemCount":1,"PartnerType":"Associates","PartnerTag":"' + Partner_Tag + '","Keywords":"' + word + '","SearchIndex":"Books","Resources":["Images.Primary.Small","ItemInfo.Title","ItemInfo.ByLineInfo"]}';
+
   var canonicalURL = prepareCanonicalRequest_2(timestamp, dataString);
   
   Logger.log("1");
@@ -83,8 +92,8 @@ function doGet(e) {
   var json=JSON.parse(response.getContentText());
   Logger.log(json);
   datasheet.getRange(2, 1).setValue(json);
-  Logger.log(json["SearchResult"]["Items"]);
-  Logger.log(json["SearchResult"]["Items"][0]["DetailPageURL"]);
+//  Logger.log(json["SearchResult"]["Items"]);
+//  Logger.log(json["SearchResult"]["Items"][0]["DetailPageURL"]);
   
   var my_url=json["SearchResult"]["Items"][0]["DetailPageURL"];
   var my_author=json["SearchResult"]["Items"][0]["ItemInfo"]["ByLineInfo"]["Contributors"][0]["Name"];
@@ -117,140 +126,6 @@ function doGet(e) {
 }
 
 
-function main_2() {
-  
-  //スプレッドシートシートを取得
-  var datasheet = SpreadsheetApp.getActiveSheet();
-  
-  var word = "ONEPIECE";
-  word = escape(word);
-  var Partner_Tag = PropertiesService.getScriptProperties().getProperty("PartnerTag");
-  var Access_Key = PropertiesService.getScriptProperties().getProperty("AccessKey");
-  var Secret_Key = PropertiesService.getScriptProperties().getProperty("SecretKey");
-  
-  var host = "webservices.amazon.co.jp";
-  var region = "us-west-2";
-  var path = "/paapi5/searchitems";
-  
-  //日時の取得
-  var now = new Date();
-  var yyyymmdd = Utilities.formatDate(now, "GMT", "yyyyMMdd")
-  var timestamp = yyyymmdd + "T" + Utilities.formatDate(now, "GMT", "HHmmss") + "Z";
-  // console.log(yyyymmdd);
-  // Logger.log(timestamp);
-  //  yyyymmdd = "20200804";
-  //  timestamp = "20200804T153132Z";
-  
-  //  var dataString = '{\n    "Keywords": "' + word + '",\n    "PartnerTag": "' + Partner_Tag + '",\n    "PartnerType": "Associates",\n    "Marketplace": "www.amazon.co.jp"\n}';
-  //  dataString = '{\n   "PartnerType":"Associates",\n   "PartnerTag":"shark0731-22",\n    "Keywords":"Harry",\n   "SearchIndex":"All",\n    "Resources":["Images.Primary.Small",\n    "ItemInfo.Title",\n   "Offers.Listings.Price"]}';
-  //  Logger.log(dataString);
-  //  Logger.log("\n");
-  var dataString = '{"ItemCount":1,"PartnerType":"Associates","PartnerTag":"' + Partner_Tag + '","Keywords":"' + word + '","SearchIndex":"Books","Resources":["Images.Primary.Small","ItemInfo.Title","ItemInfo.ByLineInfo"]}';
-  //  Logger.log(dataString);
-  // dataString = '{"Keywords":"Harry","PartnerTag": "shark0731-22","PartnerType": "Associates","Marketplace": "www.amazon.co.jp"}';
-  //  Logger.log(test);
-  
-  //  var canonicalURL=prepareCanonicalRequest(timestamp,"payload");
-  var canonicalURL = prepareCanonicalRequest_2(timestamp, dataString);
-  
-  Logger.log("1");
-  Logger.log(canonicalURL);
-  Logger.log(SHA256(canonicalURL));
-  
-  var stringToSign = prepareStringToSign_2(timestamp, yyyymmdd, canonicalURL);
-  //  Logger.log("2");
-  //  Logger.log(stringToSign);
-  
-  var signature = calculateSignature_2(Secret_Key, yyyymmdd, region, "ProductAdvertisingAPI", stringToSign);
-  Logger.log("signature");
-  Logger.log(signature);
-  
-  //Scratchpad
-  // var Authorization = "AWS4-HMAC-SHA256 Credential=" + Access_Key + "/" + yyyymmdd + "/us-west-2/ProductAdvertisingAPI/aws4_request SignedHeaders=content-encoding;host;x-amz-date;x-amz-target  Signature=" + signature;
-  
-  //PHP
-  var Authorization = "AWS4-HMAC-SHA256 Credential=" + Access_Key + "/" + yyyymmdd + "/us-west-2/ProductAdvertisingAPI/aws4_request,SignedHeaders=content-encoding;content-type;host;x-amz-date;x-amz-target,Signature=" + signature;
-  // Logger.log(Authorization);
-  //  Authorization="AWS4-HMAC-SHA256 Credential=AKIAIDXIEXSD36CHFA5A/20200803/us-west-2/ProductAdvertisingAPI/aws4_request SignedHeaders=content-encoding;host;x-amz-date;x-amz-target  Signature=072928ad8222166e7754c8a6248af8ad5db6e925dc5f4907f5aec0d29729da03";
-  
-  // var headers = {
-  //   //    'Host': host,
-  //   'Accept': 'application/json, text/javascript',
-  //   'Accept-Language': 'en-US',
-  //   'Content-Type': 'application/json; charset=UTF-8',
-  //   //    'X-Amz-Date': timestamp,
-  //   'X-Amz-Date': timestamp,
-  //   'X-Amz-Target': 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems',
-  //   'Content-Encoding': 'amz-1.0',
-  //   'Authorization': Authorization
-  // };
-  
-  var headers = {
-    //    'Host': host,
-    // 'Accept': 'application/json, text/javascript',
-    // 'Accept-Language': 'en-US',
-    'content-type': 'application/json; charset=utf-8',
-    //    'X-Amz-Date': timestamp,
-    'x-amz-date': timestamp,
-    'x-amz-target': 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems',
-    'content-encoding': 'amz-1.0',
-    'Authorization': Authorization
-  };
-  
-  Logger.log(headers);
-  
-  
-  var url = 'https://webservices.amazon.co.jp/paapi5/searchitems';
-  
-  var options = {
-    method: 'POST',
-    headers: headers,
-    payload: dataString,
-    muteHttpExceptions: true,
-  };
-  Logger.log(options);
-  
-  datasheet.getRange(1, 1).setValue(options);
-  
-  // request(options, callback);
-  
-  var response = UrlFetchApp.fetch(url, options);
-  Logger.log(response+"\n\n\n");
-  datasheet.getRange(1, 1).setValue(response);
-  
-  var json=JSON.parse(response.getContentText());
-  Logger.log(json);
-  datasheet.getRange(2, 1).setValue(json);
-  Logger.log(json["SearchResult"]["Items"]);
-  Logger.log(json["SearchResult"]["Items"][0]["DetailPageURL"]);
-  
-  var my_url=json["SearchResult"]["Items"][0]["DetailPageURL"];
-  var my_author=json["SearchResult"]["Items"][0]["ItemInfo"]["ByLineInfo"]["Contributors"][0]["Name"];
-  var my_title=json["SearchResult"]["Items"][0]["ItemInfo"]["Title"]["DisplayValue"];
-  var my_picture_url=json["SearchResult"]["Items"][0]["Images"]["Primary"]["Small"]["URL"];
-  //  Logger.log(my_url+"\n"+my_author+"\n"+my_title+"\n"+my_picture_url+"\n");
-  
-  value = {
-    affiliate_url: my_url,
-    author: my_author,
-    title:my_title,
-    pictur_url:my_picture_url,
-    };
-
-  
-  var result = {
-    message: value
-  }
-  
-  var out = ContentService.createTextOutput();
-  
-  //Mine TypeをJSONに
-  out.setMimeType(ContentService.MimeType.JSON);
-  
-  //JSONテキストをセット
-  out.setContent(JSON.stringify(result));
-  
-}
 
 
 function prepareCanonicalRequest_2(timestamp, payload) {
@@ -262,10 +137,7 @@ function prepareCanonicalRequest_2(timestamp, payload) {
   canonicalUrl = canonicalUrl + "x-amz-date:" + timestamp + "\n";
   canonicalUrl = canonicalUrl + "x-amz-target:com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems" + "\n\n";
   canonicalUrl = canonicalUrl + "content-encoding;content-type;host;x-amz-date;x-amz-target" + "\n";
-  // canonicalUrl=canonicalUrl+SHA256(payload);
   canonicalUrl = canonicalUrl + SHA256_2(payload);
-  //canonicalUrl = canonicalUrl + SHA256('{"PartnerType":"Associates","PartnerTag":"shark0731-22","Keywords":"Harry","SearchIndex":"All","Resources":["Images.Primary.Small","ItemInfo.Title","Offers.Listings.Price"]}');
-  
   return canonicalUrl;
 }
 
@@ -281,22 +153,9 @@ function prepareStringToSign_2(timestamp, yyyymmdd, canonicalURL) {
 
 function calculateSignature_2(secretAccessKey, currentDate, regionName, serviceName, stringToSign) {
   var kDate = my_HMAC_keytext_2(currentDate, "AWS4" + secretAccessKey);
-  // Logger.log("kDate\n");
-  // Logger.log(kDate);
-  //  Logger.log(my_HMAC_keytext_HEXOutput_2(currentDate, "AWS4" + secretAccessKey));
   var kRegion = my_HMAC_keyB64_2(regionName, kDate);
-  // Logger.log("kRegion\n");
-  // Logger.log(kRegion);
-  // Logger.log(my_HMAC_keyB64_HEXOutput_2(regionName, kDate));
   var kService = my_HMAC_keyB64_2(serviceName, kRegion);
-  // Logger.log("kService\n");
-  // Logger.log(kService);
-  // Logger.log(my_HMAC_keyB64_HEXOutput_2(serviceName, kRegion));
   var kSigning = my_HMAC_keyB64_2("aws4_request", kService);
-  // Logger.log("kSigning\n");
-  // Logger.log(kSigning);
-  // Logger.log(my_HMAC_keyB64_HEXOutput_2("aws4_request", kService));
-  
   var signatureKey = kSigning;
   var signature = my_HMAC_keyB64_HEXOutput_2(stringToSign, signatureKey);
   // Logger.log(signature);
@@ -383,48 +242,132 @@ function my_HMAC_keyB64_HEXOutput_2(value, key) {
 
 
 
-// function getSignatureKey(key, date, regionName, serviceName) {
-//   // var kDate = hash_hmac(date, "AWS4" + key);
-//   // var kRegion = hash_hmac(regionName, kDate);
-//   // var kService = hash_hmac(serviceName, kRegion);
-//   // var kSigning = hash_hmac("aws4_request", kService);
+function main_2() {
+   
+  //スプレッドシートシートを取得
+  var datasheet = SpreadsheetApp.getActiveSheet();
+  
+ var word = "日本再興戦略 (NewsPicks Book)";
+  // var word = e.parameter.word;
+  Logger.log(word);
+  word=escape(word);
+  Logger.log(word);
+  word=word.toLowerCase();
+  Logger.log(word);
+    word=word.replace(/%/g,"\\");
+  Logger.log(word);
+   word=word.replace(/\\2\d/g," ");
+  Logger.log(word);
+  
+  var Partner_Tag = PropertiesService.getScriptProperties().getProperty("PartnerTag");
+  var Access_Key = PropertiesService.getScriptProperties().getProperty("AccessKey");
+  var Secret_Key = PropertiesService.getScriptProperties().getProperty("SecretKey");
+  
+  var host = "webservices.amazon.co.jp";
+  var region = "us-west-2";
+  var path = "/paapi5/searchitems";
+  
+  //日時の取得
+  var now = new Date();
+  var yyyymmdd = Utilities.formatDate(now, "GMT", "yyyyMMdd")
+  var timestamp = yyyymmdd + "T" + Utilities.formatDate(now, "GMT", "HHmmss") + "Z";
+  // console.log(yyyymmdd);
+  // Logger.log(timestamp);
+  
+  
+// var dataString = '{"ItemCount":1,"PartnerType":"Associates","PartnerTag":"' + Partner_Tag + '","Keywords":"' + word + '","SearchIndex":"Books","Resources":["Images.Primary.Small","ItemInfo.Title","ItemInfo.ByLineInfo"]}';
+ var dataString = '{"PartnerType":"Associates","PartnerTag":"' + Partner_Tag + '","Keywords":"' + word + '","SearchIndex":"Books","Resources":["Images.Primary.Small","ItemInfo.Title","ItemInfo.ByLineInfo"]}';
 
-//   var kDate = my_HMAC_keytext(date, "AWS4" + key);
-//   var kRegion = my_HMAC_keyB64(regionName, kDate);
-//   var kService = my_HMAC_keyB64(serviceName, kRegion);
-//   var kSigning = my_HMAC_keyB64("aws4_request", kService);
-//   return kSigning;
-//   // var kDate = Utilities.computeHmacSha256Signature(date, "AWS4" + key);
-//   // kDate = kDate.reduce(function (str, chr) {
-//   //   chr = (chr < 0 ? chr + 256 : chr).toString(16);
-//   //   return str + (chr.length == 1 ? '0' : '') + chr;
-//   // }, '');
-//   // var kRegion = Utilities.computeHmacSha256Signature(regionName, kDate);
-//   // kRegion = kRegion.reduce(function (str, chr) {
-//   //   chr = (chr < 0 ? chr + 256 : chr).toString(16);
-//   //   return str + (chr.length == 1 ? '0' : '') + chr;
-//   // }, '');
-//   // var kService = Utilities.computeHmacSha256Signature(serviceName, kRegion);
-//   // kService = kService.reduce(function (str, chr) {
-//   //   chr = (chr < 0 ? chr + 256 : chr).toString(16);
-//   //   return str + (chr.length == 1 ? '0' : '') + chr;
-//   // }, '');
-//   // var kSigning = Utilities.computeHmacSha256Signature("aws4_request", kService);
-//   // kSigning = kSigning.reduce(function (str, chr) {
-//   //   chr = (chr < 0 ? chr + 256 : chr).toString(16);
-//   //   return str + (chr.length == 1 ? '0' : '') + chr;
-//   // }, '');
-//   // return kSigning;
-// }
+  
+  var canonicalURL = prepareCanonicalRequest_2(timestamp, dataString);
+  
+  Logger.log("1");
+  Logger.log(canonicalURL);
+  Logger.log(SHA256(canonicalURL));
+  Logger.log(dataString);
+  
+  
+  var stringToSign = prepareStringToSign_2(timestamp, yyyymmdd, canonicalURL);
+  //  Logger.log("2");
+  //  Logger.log(stringToSign);
+  
+  var signature = calculateSignature_2(Secret_Key, yyyymmdd, region, "ProductAdvertisingAPI", stringToSign);
+  Logger.log("signature");
+  Logger.log(signature);
+  
+  
+  //PHP
+  var Authorization = "AWS4-HMAC-SHA256 Credential=" + Access_Key + "/" + yyyymmdd + "/us-west-2/ProductAdvertisingAPI/aws4_request,SignedHeaders=content-encoding;content-type;host;x-amz-date;x-amz-target,Signature=" + signature;
+  // Logger.log(Authorization);
+  
+  
+  
+  var headers = {
+    //    'Host': host,
+    // 'Accept': 'application/json, text/javascript',
+    // 'Accept-Language': 'en-US',
+    'content-type': 'application/json; charset=utf-8',
+    //    'X-Amz-Date': timestamp,
+    'x-amz-date': timestamp,
+    'x-amz-target': 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems',
+    'content-encoding': 'amz-1.0',
+    'Authorization': Authorization
+  };
+  
+  Logger.log(headers);
+  
+  
+  var url = 'https://webservices.amazon.co.jp/paapi5/searchitems';
+  
+  var options = {
+    method: 'POST',
+    headers: headers,
+    payload: dataString,
+    muteHttpExceptions: true,
+  };
+  Logger.log(options);
+  
+  datasheet.getRange(1, 1).setValue(options);
+  
+  // request(options, callback);
+  
+  var response = UrlFetchApp.fetch(url, options);
+  Logger.log(response+"\n\n\n");
+  datasheet.getRange(1, 1).setValue(response);
+  
+  var json=JSON.parse(response.getContentText());
+  Logger.log(json);
+  datasheet.getRange(2, 1).setValue(json);
+//  Logger.log(json["SearchResult"]["Items"]);
+//  Logger.log(json["SearchResult"]["Items"][0]["DetailPageURL"]);
+  
+  var my_url=json["SearchResult"]["Items"][0]["DetailPageURL"];
+  var my_author=json["SearchResult"]["Items"][0]["ItemInfo"]["ByLineInfo"]["Contributors"][0]["Name"];
+  var my_title=json["SearchResult"]["Items"][0]["ItemInfo"]["Title"]["DisplayValue"];
+  var my_picture_url=json["SearchResult"]["Items"][0]["Images"]["Primary"]["Small"]["URL"];
+  //  Logger.log(my_url+"\n"+my_author+"\n"+my_title+"\n"+my_picture_url+"\n");
+  
+  value = {
+    affiliate_url: my_url,
+    author: my_author,
+    title:my_title,
+    pictur_url:my_picture_url,
+    };
 
-// function hash_hmac(value, key) {
-//   var output = Utilities.computeHmacSha256Signature(value, key);
-//   output = output.reduce(function (str, chr) {
-//     chr = (chr < 0 ? chr + 256 : chr).toString(16);
-//     return str + (chr.length == 1 ? '0' : '') + chr;
-//   }, '');
+  
+  var result = {
+    message: value
+  }
+  
+  var out = ContentService.createTextOutput();
+  
+  //Mine TypeをJSONに
+  out.setMimeType(ContentService.MimeType.JSON);
+  
+  //JSONテキストをセット
+  out.setContent(JSON.stringify(result));
 
-//   // output=Utilities.base64Encode(output);
-//   // output=encodeURIComponent(output);
-//   return output;
-// }
+  return out;
+  
+  
+}
